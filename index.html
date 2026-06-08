@@ -56,7 +56,7 @@ h1{
   border-radius:18px;
   padding:10px;
   overflow:hidden;
-  min-height:290px;
+  min-height:330px;
   transition:.15s ease;
 }
 .card.off{opacity:.30;filter:grayscale(1)}
@@ -75,7 +75,7 @@ h1{
 .pname{font-size:15px;font-weight:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .badge{font-size:10px;font-weight:1000;color:#08090d;background:#fff;border-radius:999px;padding:4px 7px;white-space:nowrap}
 .result{
-  min-height:178px;
+  min-height:220px;
   border-radius:14px;
   background:#03050a;
   border:1px solid rgba(255,255,255,.18);
@@ -92,11 +92,12 @@ h1{
 }
 .charImg{
   width:100%;
-  height:132px;
-  object-fit:cover;
-  object-position:center top;
+  height:172px;
+  object-fit:contain;
+  object-position:center center;
   border-radius:10px;
   display:none;
+  background:#05070c;
 }
 .charName{
   width:100%;
@@ -189,8 +190,8 @@ textarea{min-height:125px;line-height:1.45;resize:vertical}
   .players{grid-template-columns:1fr}
   .settingsGrid{grid-template-columns:1fr}
   .modeGrid{grid-template-columns:1fr 1fr}
-  .result{min-height:210px}
-  .charImg{height:160px}
+  .result{min-height:260px}
+  .charImg{height:210px}
   .card{min-height:auto}
 }
 </style>
@@ -246,7 +247,7 @@ var defaultData=[
   {name:"けたん",active:true,chars:["追跡者","鉄の目","レディ","復讐者","執行者"]}
 ];
 var labels=["RED","GREEN","BLUE","PURPLE"];
-var STORAGE_KEY="nightreign_roulette_image_version_v1";
+var STORAGE_KEY="nightreign_roulette_image_contain_v1";
 var data=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null")||JSON.parse(JSON.stringify(defaultData));
 var timers=[null,null,null,null];
 
