@@ -117,7 +117,6 @@ button{
 }
 button:active{transform:translateY(2px);box-shadow:0 3px 0 rgba(0,0,0,.36)}
 .stopBtn{background:#ff6666;color:#fff}
-.grayBtn{background:#e5e7eb;color:#111}
 .miniBtn{font-size:12px;padding:9px 8px;border-radius:11px;background:#374151;color:#fff}
 .controlGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
 .controlGrid button{font-size:17px;padding:15px 10px}
@@ -201,7 +200,7 @@ textarea{min-height:125px;line-height:1.45;resize:vertical}
       <button class="stopBtn" onclick="resetData()">初期状態に戻す</button>
     </div>
     <div class="hint">
-      候補キャラは1行に1キャラずつ入力。基本は各自5体想定。<br>
+      候補キャラは1行に1キャラずつ入力。<br>
       「参加する」を外すと、その人だけルーレット対象外になります。4人集まって3人だけプレイする時に便利。
     </div>
   </details>
@@ -211,13 +210,16 @@ textarea{min-height:125px;line-height:1.45;resize:vertical}
 
 <script>
 var defaultData=[
-  {name:"プレイヤー1",active:true,chars:["ワイルダー","守護者","鉄の目","レディ","無頼漢"]},
-  {name:"プレイヤー2",active:true,chars:["ワイルダー","守護者","鉄の目","レディ","無頼漢"]},
-  {name:"プレイヤー3",active:true,chars:["ワイルダー","守護者","鉄の目","レディ","無頼漢"]},
-  {name:"プレイヤー4",active:false,chars:["ワイルダー","守護者","鉄の目","レディ","無頼漢"]}
+  {name:"すず",active:true,chars:["追跡者","鉄の目","レディ","復讐者","葬儀屋"]},
+  {name:"とみた",active:true,chars:["追跡者","鉄の目","レディ","無頼漢","復讐者"]},
+  {name:"ぱるこ",active:true,chars:["追跡者","鉄の目","レディ","無頼漢","復讐者"]},
+  {name:"けたん",active:true,chars:["追跡者","鉄の目","レディ","復讐者","執行者"]}
 ];
 var labels=["RED","GREEN","BLUE","PURPLE"];
-var data=JSON.parse(localStorage.getItem("nightreign_roulette_freeinput_v2")||"null")||JSON.parse(JSON.stringify(defaultData));
+
+// バージョンを変えると、過去に保存した端末設定より今回の初期設定を優先できます
+var STORAGE_KEY="nightreign_roulette_default_members_v1";
+var data=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null")||JSON.parse(JSON.stringify(defaultData));
 var timers=[null,null,null,null];
 
 function esc(s){
@@ -276,7 +278,7 @@ function stopActive(){for(var i=0;i<4;i++)stop(i)}
 function toggleActive(i){
   if(timers[i])stop(i);
   data[i].active=!data[i].active;
-  localStorage.setItem("nightreign_roulette_freeinput_v2",JSON.stringify(data));
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
   draw();
 }
 function saveData(){
@@ -288,14 +290,14 @@ function saveData(){
     data[i].chars=list;
     data[i].active=document.getElementById("a"+i).checked;
   }
-  localStorage.setItem("nightreign_roulette_freeinput_v2",JSON.stringify(data));
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
   for(var j=0;j<4;j++){if(timers[j]){clearInterval(timers[j]);timers[j]=null;}}
   draw();
   showToast("保存しました");
 }
 function resetData(){
   if(!confirm("初期状態に戻しますか？"))return;
-  localStorage.removeItem("nightreign_roulette_freeinput_v2");
+  localStorage.removeItem(STORAGE_KEY);
   data=JSON.parse(JSON.stringify(defaultData));
   for(var i=0;i<4;i++){if(timers[i])clearInterval(timers[i]);timers[i]=null;}
   draw();
