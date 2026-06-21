@@ -1,357 +1,608 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>4人用キャラルーレット</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nightreign Roulette</title>
 <style>
-:root{
-  --bg:#05070c;
-  --text:#fff;
-  --muted:#b7bfce;
-  --yellow:#ffe04b;
-  --red:#ff3737;
-  --green:#27d65f;
-  --blue:#2d78ff;
-  --purple:#c852ff;
+/* =========================
+   Nightreign Roulette v2
+   黒背景 / 4人 / 12枠 / 個別停止 / 全員同時停止 / 休みボタン
+   ========================= */
+
+* {
+  box-sizing: border-box;
 }
-*{box-sizing:border-box}
-body{
-  margin:0;
-  min-height:100svh;
-  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;
-  color:var(--text);
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  min-height: 100vh;
+  color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
   background:
-    radial-gradient(circle at 50% -10%, rgba(255,224,75,.22), transparent 34%),
-    radial-gradient(circle at 8% 12%, rgba(45,120,255,.18), transparent 30%),
-    radial-gradient(circle at 92% 18%, rgba(255,55,55,.15), transparent 30%),
-    linear-gradient(180deg,#111827,#05070c 74%);
-  padding:14px;
+    radial-gradient(circle at 50% -12%, rgba(100, 116, 139, 0.48), transparent 32%),
+    radial-gradient(circle at 10% 10%, rgba(37, 99, 235, 0.18), transparent 28%),
+    radial-gradient(circle at 90% 6%, rgba(168, 85, 247, 0.12), transparent 26%),
+    linear-gradient(180deg, #04060b 0%, #111827 48%, #05070c 100%);
+  overflow-x: hidden;
 }
-.wrap{max-width:980px;margin:0 auto}
-h1{
-  margin:8px 0 4px;
-  text-align:center;
-  font-size:28px;
-  letter-spacing:.04em;
-  text-shadow:0 4px 0 #000,0 0 20px rgba(255,224,75,.25);
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.22;
+  background-image:
+    radial-gradient(circle, rgba(255,255,255,0.34) 0 1.5px, transparent 2.6px),
+    radial-gradient(circle, rgba(255,255,255,0.13) 0 1px, transparent 2px);
+  background-size: 92px 92px, 54px 54px;
+  background-position: 18px 24px, 8px 12px;
 }
-.sub{text-align:center;color:var(--muted);font-size:13px;line-height:1.45;margin-bottom:14px}
-.board{
-  background:rgba(255,255,255,.08);
-  border:1px solid rgba(255,255,255,.16);
-  border-radius:24px;
-  padding:12px;
-  box-shadow:0 22px 55px rgba(0,0,0,.48);
+
+.app {
+  position: relative;
+  width: min(1180px, 96vw);
+  margin: 0 auto;
+  padding: 22px 0 30px;
 }
-.players{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:10px;
+
+.header {
+  text-align: center;
+  margin-bottom: 16px;
 }
-.card{
-  position:relative;
-  background:linear-gradient(180deg,#1c2230,#0b0f18);
-  border:4px solid #555;
-  border-radius:18px;
-  padding:10px;
-  overflow:hidden;
-  min-height:330px;
-  transition:.15s ease;
+
+.title {
+  margin: 0;
+  font-size: clamp(34px, 5.4vw, 64px);
+  line-height: 1;
+  letter-spacing: 0.05em;
+  color: #ffffff;
+  text-shadow:
+    0 5px 0 rgba(0,0,0,0.55),
+    0 13px 30px rgba(0,0,0,0.55);
 }
-.card.off{opacity:.30;filter:grayscale(1)}
-.card:before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:linear-gradient(135deg,rgba(255,255,255,.13),transparent 45%);
-  pointer-events:none;
+
+.subtitle {
+  margin: 9px 0 0;
+  color: rgba(255,255,255,0.78);
+  font-size: 17px;
+  font-weight: 800;
 }
-.c0{border-color:var(--red)}
-.c1{border-color:var(--green)}
-.c2{border-color:var(--blue)}
-.c3{border-color:var(--purple)}
-.nameRow{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:8px;position:relative;z-index:1}
-.pname{font-size:15px;font-weight:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.badge{font-size:10px;font-weight:1000;color:#08090d;background:#fff;border-radius:999px;padding:4px 7px;white-space:nowrap}
-.result{
-  min-height:220px;
-  border-radius:14px;
-  background:#03050a;
-  border:1px solid rgba(255,255,255,.18);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  padding:7px;
-  position:relative;
-  z-index:1;
-  text-shadow:0 3px 0 #000;
-  overflow:hidden;
+
+.global-controls {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 0 0 18px;
 }
-.charImg{
-  width:100%;
-  height:172px;
-  object-fit:contain;
-  object-position:center center;
-  border-radius:10px;
-  display:none;
-  background:#05070c;
+
+.players {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
 }
-.charName{
-  width:100%;
-  margin-top:6px;
-  font-size:24px;
-  font-weight:1000;
-  letter-spacing:.04em;
-  line-height:1.1;
+
+.card {
+  position: relative;
+  min-height: 590px;
+  padding: 14px;
+  border-radius: 28px;
+  border: 2px solid rgba(255,255,255,0.34);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.055));
+  box-shadow:
+    0 20px 40px rgba(0,0,0,0.42),
+    inset 0 0 0 1px rgba(255,255,255,0.10);
+  overflow: hidden;
 }
-.placeholder{
-  font-size:44px;
-  font-weight:1000;
+
+.card::after {
+  content: "";
+  position: absolute;
+  inset: -45% -30%;
+  background: radial-gradient(circle, rgba(255,255,255,0.11), transparent 42%);
+  transform: translateY(-38%);
+  pointer-events: none;
 }
-.spin .result{
-  animation:shake .10s infinite alternate;
-  box-shadow:0 0 28px rgba(255,224,75,.25) inset;
+
+.card.is-off {
+  opacity: 0.42;
+  filter: grayscale(0.8);
 }
-@keyframes shake{
-  from{transform:translateX(-1px) scale(.99);filter:brightness(.82)}
-  to{transform:translateX(1px) scale(1.03);filter:brightness(1.38)}
+
+.player-name {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 112px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 27px;
+  font-weight: 900;
+  color: #ffffff;
+  text-shadow: 0 2px 0 rgba(0,0,0,0.35);
+  box-shadow:
+    inset 0 -5px 0 rgba(0,0,0,0.28),
+    0 9px 18px rgba(0,0,0,0.25);
 }
-button{
-  appearance:none;
-  border:0;
-  border-radius:14px;
-  width:100%;
-  padding:13px 10px;
-  margin-top:9px;
-  font-size:15px;
-  font-weight:1000;
-  background:var(--yellow);
-  color:#111;
-  box-shadow:0 5px 0 rgba(0,0,0,.36);
-  position:relative;
-  z-index:1;
+
+.window {
+  position: relative;
+  z-index: 1;
+  height: 375px;
+  margin: 16px 0 12px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 50% 30%, rgba(255,255,255,0.20), transparent 55%),
+    linear-gradient(180deg, rgba(15,23,42,0.92), rgba(2,6,23,0.80));
+  border: 1px solid rgba(255,255,255,0.22);
+  box-shadow:
+    inset 0 0 0 2px rgba(255,255,255,0.06),
+    inset 0 -20px 42px rgba(0,0,0,0.28);
 }
-button:active{transform:translateY(2px);box-shadow:0 3px 0 rgba(0,0,0,.36)}
-.stopBtn{background:#ff6666;color:#fff}
-.miniBtn{font-size:12px;padding:9px 8px;border-radius:11px;background:#374151;color:#fff}
-.controlGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-.controlGrid button{font-size:17px;padding:15px 10px}
-.modeGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
-details{
-  margin-top:14px;
-  background:rgba(18,23,34,.96);
-  border:1px solid rgba(255,255,255,.14);
-  border-radius:22px;
-  padding:13px;
+
+.window img {
+  width: 94%;
+  height: 94%;
+  object-fit: contain;
+  filter: drop-shadow(0 13px 8px rgba(0,0,0,0.42));
+  user-select: none;
+  pointer-events: none;
 }
-summary{font-size:18px;font-weight:1000;cursor:pointer;list-style:none}
-summary::-webkit-details-marker{display:none}
-.settingsGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
-.setBox{background:#080c14;border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:10px}
-label{display:block;color:#cbd5e1;font-size:12px;font-weight:900;margin:8px 0 5px}
-input,textarea{
-  width:100%;
-  border-radius:12px;
-  border:1px solid #344052;
-  background:#030712;
-  color:#fff;
-  padding:10px;
-  font-size:15px;
-  font-family:inherit;
+
+.question {
+  font-size: 116px;
+  font-weight: 900;
+  color: rgba(255,255,255,0.92);
+  text-shadow: 0 5px 0 rgba(0,0,0,0.35);
 }
-textarea{min-height:125px;line-height:1.45;resize:vertical}
-.checkRow{display:flex;align-items:center;gap:8px;margin-top:8px;color:#d1d5db;font-size:13px;font-weight:800}
-.checkRow input{width:auto}
-.footerBtns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
-.hint{color:var(--muted);font-size:12px;line-height:1.55;margin-top:10px}
-.toast{
-  position:fixed;
-  left:50%;
-  bottom:22px;
-  transform:translateX(-50%);
-  background:#fff;
-  color:#111;
-  padding:10px 16px;
-  border-radius:999px;
-  font-weight:1000;
-  display:none;
-  box-shadow:0 10px 30px rgba(0,0,0,.38);
-  z-index:99;
+
+.character-name {
+  position: relative;
+  z-index: 1;
+  min-height: 48px;
+  margin: 0 0 12px;
+  display: grid;
+  place-items: center;
+  font-size: 31px;
+  font-weight: 900;
+  text-shadow:
+    0 4px 0 rgba(0,0,0,0.45),
+    0 10px 20px rgba(0,0,0,0.35);
 }
-@media(max-width:900px){
-  .players{grid-template-columns:repeat(2,1fr)}
+
+.buttons {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
 }
-@media(max-width:560px){
-  body{padding:10px}
-  h1{font-size:24px}
-  .players{grid-template-columns:1fr}
-  .settingsGrid{grid-template-columns:1fr}
-  .modeGrid{grid-template-columns:1fr 1fr}
-  .result{min-height:260px}
-  .charImg{height:210px}
-  .card{min-height:auto}
+
+button {
+  border: 0;
+  cursor: pointer;
+  border-radius: 16px;
+  padding: 13px 8px;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-shadow: 0 2px 0 rgba(0,0,0,0.28);
+  box-shadow:
+    inset 0 -5px 0 rgba(0,0,0,0.24),
+    0 8px 16px rgba(0,0,0,0.24);
+  transition: transform 0.06s ease, filter 0.12s ease;
+}
+
+button:hover {
+  filter: brightness(1.07);
+}
+
+button:active {
+  transform: translateY(2px);
+  box-shadow:
+    inset 0 -3px 0 rgba(0,0,0,0.24),
+    0 5px 12px rgba(0,0,0,0.18);
+}
+
+.start,
+.start-all {
+  background: linear-gradient(180deg, #34d399, #059669);
+}
+
+.stop,
+.stop-all {
+  background: linear-gradient(180deg, #fb7185, #dc2626);
+}
+
+.dayoff {
+  width: 100%;
+  background: linear-gradient(180deg, #64748b, #334155);
+}
+
+.reset {
+  background: linear-gradient(180deg, #475569, #1e293b);
+}
+
+.global-controls button {
+  min-width: 170px;
+  border-radius: 999px;
+  padding: 14px 22px;
+  font-size: 20px;
+}
+
+.card.is-rolling .window {
+  animation: roll 0.075s linear infinite;
+}
+
+.card.is-rolling .character-name {
+  animation: blink 0.18s linear infinite;
+}
+
+.card.is-off .window {
+  background:
+    linear-gradient(180deg, rgba(30,41,59,0.88), rgba(15,23,42,0.88));
+}
+
+.card.is-off .character-name {
+  font-size: 0;
+}
+
+.card.is-off .character-name::after {
+  content: "休み";
+  font-size: 31px;
+}
+
+@keyframes roll {
+  0% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-2px) scale(1.025); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.72; }
+}
+
+@media (max-width: 980px) {
+  .players {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .card {
+    min-height: 520px;
+  }
+
+  .window {
+    height: 315px;
+  }
+}
+
+@media (max-width: 560px) {
+  .app {
+    width: min(430px, 94vw);
+  }
+
+  .players {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    min-height: auto;
+  }
 }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>キャラルーレット</h1>
-  <div class="sub">4人用／画像＋キャラ名／設定は各スマホに保存</div>
+<main class="app">
+  <header class="header">
+    <h1 class="title">キャラルーレット</h1>
+    <p class="subtitle">10キャラ＋自由＋同キャラ</p>
+  </header>
 
-  <div class="board">
-    <div class="players" id="players"></div>
-
-    <div class="controlGrid">
-      <button onclick="startActive()">参加者スタート</button>
-      <button class="stopBtn" onclick="stopActive()">参加者ストップ</button>
-    </div>
-
-    <div class="modeGrid" id="quickToggles"></div>
+  <div class="global-controls">
+    <button type="button" class="start-all" id="startAll">全員スタート</button>
+    <button type="button" class="stop-all" id="stopAll">全員ストップ</button>
+    <button type="button" class="reset" id="reset">リセット</button>
   </div>
 
-  <details>
-    <summary>▼ 設定</summary>
-    <div class="settingsGrid" id="settings"></div>
-    <div class="footerBtns">
-      <button onclick="saveData()">設定を保存・反映</button>
-      <button class="stopBtn" onclick="resetData()">初期状態に戻す</button>
-    </div>
-    <div class="hint">
-      候補キャラは1行に1キャラずつ入力。<br>
-      「参加する」を外すと、その人だけルーレット対象外になります。
-    </div>
-  </details>
-</div>
-
-<div class="toast" id="toast">保存しました</div>
+  <section class="players" id="players"></section>
+</main>
 
 <script>
-var characterImages={
-  "追跡者":"images/tsuisekisha.webp",
-  "鉄の目":"images/tetsunome.webp",
-  "レディ":"images/lady.webp",
-  "無頼漢":"images/buraikan.webp",
-  "復讐者":"images/fukushusha.webp",
-  "隠者":"images/inja.webp",
-  "葬儀屋":"images/sogiya.webp",
-  "執行者":"images/shikkosha.webp"
-};
+/* =========================
+   Data
+   ========================= */
 
-var defaultData=[
-  {name:"すず",active:true,chars:["追跡者","隠者","レディ","復讐者","葬儀屋"]},
-  {name:"とみた",active:true,chars:["追跡者","鉄の目","レディ","無頼漢","復讐者"]},
-  {name:"ぱるこ",active:true,chars:["追跡者","鉄の目","レディ","無頼漢","復讐者"]},
-  {name:"けたん",active:true,chars:["追跡者","鉄の目","レディ","復讐者","執行者"]}
+const PLAYERS = [
+  {
+    "name": "すず",
+    "color": "#ef4444"
+  },
+  {
+    "name": "とみた",
+    "color": "#22c55e"
+  },
+  {
+    "name": "ぱるこ",
+    "color": "#3b82f6"
+  },
+  {
+    "name": "けたん",
+    "color": "#a855f7"
+  }
 ];
-var labels=["RED","GREEN","BLUE","PURPLE"];
-var STORAGE_KEY="nightreign_roulette_image_contain_v1";
-var data=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null")||JSON.parse(JSON.stringify(defaultData));
-var timers=[null,null,null,null];
 
-function esc(s){
-  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-}
-function resultHtml(name){
-  var img=characterImages[name];
-  if(img){
-    return '<img class="charImg" src="'+img+'" style="display:block" alt="'+esc(name)+'"><div class="charName">'+esc(name)+'</div>';
+const CHARACTERS = [
+  {
+    "name": "追跡者",
+    "image": "images/01.png"
+  },
+  {
+    "name": "守護者",
+    "image": "images/02.png"
+  },
+  {
+    "name": "鉄の目",
+    "image": "images/03.png"
+  },
+  {
+    "name": "レディ",
+    "image": "images/04.png"
+  },
+  {
+    "name": "無頼漢",
+    "image": "images/05.png"
+  },
+  {
+    "name": "復讐者",
+    "image": "images/06.png"
+  },
+  {
+    "name": "隠者",
+    "image": "images/07.png"
+  },
+  {
+    "name": "執行者",
+    "image": "images/08.png"
+  },
+  {
+    "name": "葬儀屋",
+    "image": "images/09.png"
+  },
+  {
+    "name": "学者",
+    "image": "images/10.png"
+  },
+  {
+    "name": "自由",
+    "image": "images/11.png"
+  },
+  {
+    "name": "同キャラ",
+    "image": "images/12.png"
   }
-  if(name==="？" || name==="休み"){
-    return '<div class="placeholder">'+esc(name)+'</div>';
-  }
-  return '<div class="charName">'+esc(name)+'</div>';
-}
-function draw(){
-  var p=document.getElementById("players");
-  var s=document.getElementById("settings");
-  var q=document.getElementById("quickToggles");
-  p.innerHTML="";
-  s.innerHTML="";
-  q.innerHTML="";
-  for(var i=0;i<4;i++){
-    p.innerHTML += '<div class="card c'+i+(data[i].active?'':' off')+'" id="card'+i+'">'
-      + '<div class="nameRow"><div class="pname">'+esc(data[i].name)+'</div><div class="badge">'+labels[i]+'</div></div>'
-      + '<div id="r'+i+'" class="result">'+resultHtml(data[i].active?'？':'休み')+'</div>'
-      + '<button id="b'+i+'" onclick="toggle('+i+')">'+(data[i].active?'スタート':'休み中')+'</button>'
-      + '</div>';
+];
 
-    q.innerHTML += '<button class="miniBtn" onclick="toggleActive('+i+')">'+esc(data[i].name)+'：'+(data[i].active?'参加':'休み')+'</button>';
+/* =========================
+   State
+   ========================= */
 
-    s.innerHTML += '<div class="setBox">'
-      + '<b>プレイヤー'+(i+1)+'</b>'
-      + '<label>名前</label>'
-      + '<input id="n'+i+'" value="'+esc(data[i].name)+'">'
-      + '<label>候補キャラ</label>'
-      + '<textarea id="t'+i+'">'+esc(data[i].chars.join("\\n"))+'</textarea>'
-      + '<label class="checkRow"><input type="checkbox" id="a'+i+'" '+(data[i].active?'checked':'')+'>参加する</label>'
-      + '</div>';
+let current = PLAYERS.map(() => null);
+let intervals = PLAYERS.map(() => null);
+let off = PLAYERS.map(() => false);
+
+const playersEl = document.getElementById("players");
+
+/* =========================
+   Utility
+   ========================= */
+
+function pickCharacter() {
+  return CHARACTERS[Math.floor(Math.random() * CHARACTERS.length)];
+}
+
+function imageHTML(character) {
+  if (!character) {
+    return '<div class="question">?</div>';
+  }
+  return `<img src="${character.image}" alt="${character.name}">`;
+}
+
+function cardElement(index) {
+  return document.querySelector(`[data-card="${index}"]`);
+}
+
+function windowElement(index) {
+  return document.querySelector(`[data-window="${index}"]`);
+}
+
+function nameElement(index) {
+  return document.querySelector(`[data-result-name="${index}"]`);
+}
+
+function offButton(index) {
+  return document.querySelector(`[data-action="off"][data-index="${index}"]`);
+}
+
+/* =========================
+   Render
+   ========================= */
+
+function renderAll() {
+  playersEl.innerHTML = PLAYERS.map((player, index) => {
+    const character = current[index];
+    const rollingClass = intervals[index] ? "is-rolling" : "";
+    const offClass = off[index] ? "is-off" : "";
+
+    return `
+      <article class="card ${rollingClass} ${offClass}" data-card="${index}">
+        <div class="player-name" style="background:${player.color}">${player.name}</div>
+
+        <div class="window" data-window="${index}">
+          ${imageHTML(character)}
+        </div>
+
+        <p class="character-name" data-result-name="${index}">
+          ${character ? character.name : "未決定"}
+        </p>
+
+        <div class="buttons">
+          <button type="button" class="start" data-action="start" data-index="${index}">スタート</button>
+          <button type="button" class="stop" data-action="stop" data-index="${index}">ストップ</button>
+        </div>
+
+        <button type="button" class="dayoff" data-action="off" data-index="${index}">
+          ${off[index] ? "参加に戻す" : "休みにする"}
+        </button>
+      </article>
+    `;
+  }).join("");
+}
+
+function renderOne(index) {
+  const card = cardElement(index);
+  const win = windowElement(index);
+  const name = nameElement(index);
+  const offBtn = offButton(index);
+
+  if (!card || !win || !name) return;
+
+  const character = current[index];
+
+  card.classList.toggle("is-rolling", Boolean(intervals[index]));
+  card.classList.toggle("is-off", Boolean(off[index]));
+
+  win.innerHTML = imageHTML(character);
+  name.textContent = character ? character.name : "未決定";
+
+  if (offBtn) {
+    offBtn.textContent = off[index] ? "参加に戻す" : "休みにする";
   }
 }
-function rand(i){
-  if(!data[i].chars || data[i].chars.length===0)return "未設定";
-  return data[i].chars[Math.floor(Math.random()*data[i].chars.length)];
+
+/* =========================
+   Roulette functions
+   ========================= */
+
+function tick(index) {
+  current[index] = pickCharacter();
+  renderOne(index);
 }
-function showResult(i,name){
-  document.getElementById("r"+i).innerHTML=resultHtml(name);
+
+function startOne(index) {
+  if (off[index]) return;
+  if (intervals[index]) return;
+
+  current[index] = pickCharacter();
+  renderOne(index);
+
+  intervals[index] = window.setInterval(() => {
+    tick(index);
+  }, 70);
+
+  renderOne(index);
 }
-function start(i){
-  if(!data[i].active)return;
-  if(timers[i])return;
-  document.getElementById("b"+i).innerText="ストップ";
-  document.getElementById("b"+i).className="stopBtn";
-  document.getElementById("card"+i).classList.add("spin");
-  timers[i]=setInterval(function(){showResult(i,rand(i));},75);
+
+function stopOne(index) {
+  if (!intervals[index]) return;
+
+  window.clearInterval(intervals[index]);
+  intervals[index] = null;
+
+  current[index] = pickCharacter();
+  renderOne(index);
 }
-function stop(i){
-  if(!timers[i])return;
-  clearInterval(timers[i]);
-  timers[i]=null;
-  showResult(i,rand(i));
-  document.getElementById("b"+i).innerText="スタート";
-  document.getElementById("b"+i).className="";
-  document.getElementById("card"+i).classList.remove("spin");
-}
-function toggle(i){timers[i]?stop(i):start(i)}
-function startActive(){for(var i=0;i<4;i++)start(i)}
-function stopActive(){for(var i=0;i<4;i++)stop(i)}
-function toggleActive(i){
-  if(timers[i])stop(i);
-  data[i].active=!data[i].active;
-  localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
-  draw();
-}
-function saveData(){
-  for(var i=0;i<4;i++){
-    var nm=document.getElementById("n"+i).value.trim();
-    var list=document.getElementById("t"+i).value.split("\\n").map(function(x){return x.trim();}).filter(function(x){return x;});
-    if(list.length===0){alert("プレイヤー"+(i+1)+"の候補キャラを入れてください");return;}
-    data[i].name=nm||("プレイヤー"+(i+1));
-    data[i].chars=list;
-    data[i].active=document.getElementById("a"+i).checked;
+
+function toggleOff(index) {
+  if (intervals[index]) {
+    window.clearInterval(intervals[index]);
+    intervals[index] = null;
   }
-  localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
-  for(var j=0;j<4;j++){if(timers[j]){clearInterval(timers[j]);timers[j]=null;}}
-  draw();
-  showToast("保存しました");
+
+  off[index] = !off[index];
+
+  if (off[index]) {
+    current[index] = null;
+  }
+
+  renderOne(index);
 }
-function resetData(){
-  if(!confirm("初期状態に戻しますか？"))return;
-  localStorage.removeItem(STORAGE_KEY);
-  data=JSON.parse(JSON.stringify(defaultData));
-  for(var i=0;i<4;i++){if(timers[i])clearInterval(timers[i]);timers[i]=null;}
-  draw();
-  showToast("戻しました");
+
+function startAll() {
+  PLAYERS.forEach((_, index) => {
+    if (!off[index]) {
+      startOne(index);
+    }
+  });
 }
-function showToast(msg){
-  var t=document.getElementById("toast");
-  t.innerText=msg;
-  t.style.display="block";
-  setTimeout(function(){t.style.display="none";},1300);
+
+function stopAll() {
+  // setTimeoutを使わず、同一ループ内で全員を一斉停止
+  PLAYERS.forEach((_, index) => {
+    if (!off[index]) {
+      stopOne(index);
+    }
+  });
 }
-draw();
+
+function resetAll() {
+  intervals.forEach((timer) => {
+    if (timer) {
+      window.clearInterval(timer);
+    }
+  });
+
+  current = PLAYERS.map(() => null);
+  intervals = PLAYERS.map(() => null);
+  off = PLAYERS.map(() => false);
+
+  renderAll();
+}
+
+/* =========================
+   Event delegation
+   ========================= */
+
+playersEl.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-action]");
+  if (!button) return;
+
+  const index = Number(button.dataset.index);
+  const action = button.dataset.action;
+
+  if (action === "start") startOne(index);
+  if (action === "stop") stopOne(index);
+  if (action === "off") toggleOff(index);
+});
+
+document.getElementById("startAll").addEventListener("click", startAll);
+document.getElementById("stopAll").addEventListener("click", stopAll);
+document.getElementById("reset").addEventListener("click", resetAll);
+
+/* =========================
+   Preload images
+   ========================= */
+
+CHARACTERS.forEach((character) => {
+  const img = new Image();
+  img.src = character.image;
+});
+
+renderAll();
 </script>
 </body>
 </html>
