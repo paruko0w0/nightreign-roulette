@@ -64,15 +64,15 @@
     .p1 { background: #e34758; } .p2 { background: #0caa77; } .p3 { background: #387fe2; } .p4 { background: #8b52db; }
     .count { color: #d2d9e9; font-size: .88rem; font-weight: 700; white-space: nowrap; }
     .result-stage {
-      min-height: 216px;
+      min-height: 0;
       border-radius: 19px;
       border: 1px solid #ffffff12;
       background: radial-gradient(ellipse at 50% 18%, #293753, #10182a 72%);
       display: flex; flex-direction: column; justify-content: center; align-items: center;
       margin-bottom: 12px; padding: 14px 8px; overflow: hidden;
     }
-    .result-icon { min-height: 112px; display: grid; place-items: center; font-size: 4.8rem; line-height: 1; filter: drop-shadow(0 7px 10px #0008); }
-        .result-icon img { display: block; width: 132px; height: 132px; object-fit: contain; border-radius: 14px; filter: drop-shadow(0 7px 10px #0008); }
+    .result-icon { width: 100%; aspect-ratio: 1 / 1; min-height: 0; display: grid; place-items: center; font-size: 4.8rem; line-height: 1; filter: drop-shadow(0 7px 10px #0008); }
+    .result-icon img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 14px; filter: drop-shadow(0 7px 10px #0008); }
     .result-icon.free { color: #f7d66a; text-shadow: 0 0 24px #f7d66a55; }
     .result-name { min-height: 1.6em; font-size: 1.45rem; font-weight: 800; text-align: center; text-shadow: 0 2px 8px #0008; }
     .result-name.pending { color: #aebbd3; font-size: 1.15rem; }
@@ -87,7 +87,7 @@
     .candidate-list input { width: 18px; height: 18px; accent-color: #4dd6a5; flex: 0 0 auto; }
     .footer-note { color: #aebbd3; text-align: center; margin: 18px 0 0; font-size: .9rem; }
     @media (max-width: 1180px) { .stage-grid { grid-template-columns: repeat(3, minmax(0,1fr)); } }
-    @media (max-width: 760px) { .wrap { padding: 20px 14px 30px; } .stage-grid { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; } .card { padding: 12px; } .result-stage { min-height: 190px; } .result-icon { font-size: 4.2rem; } .result-icon img { width: 124px; height: 124px; } .toolbar button { flex: 1 1 145px; } }
+    @media (max-width: 760px) { .wrap { padding: 20px 14px 30px; } .stage-grid { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; } .card { padding: 12px; } .result-stage { min-height: 190px; } .result-icon { font-size: 4.2rem; } .toolbar button { flex: 1 1 145px; } }
     @media (max-width: 520px) { .stage-grid { grid-template-columns: 1fr; } .card { max-width: 100%; } .result-stage { min-height: 210px; } .name-pill { font-size: 1.1rem; } }
   </style>
 </head>
@@ -112,17 +112,17 @@
   </main>
   <script>
     const CHARACTERS = [
-      { name: "追跡者", icon: "🗡️", image: "images/wylder.webp" },
+      { name: "追跡者", icon: "🗡️", image: "images/executor.webp" },
       { name: "守護者", icon: "🛡️", image: "images/guardian.webp" },
-      { name: "鉄の目", icon: "🏹", image: "images/ironeye.webp" },
+      { name: "鉄の目", icon: "🏹", image: "images/wylder.webp" },
       { name: "レディ", icon: "🪶", image: "images/duchess.webp" },
       { name: "無頼漢", icon: "⚔️", image: "images/raider.webp" },
       { name: "復讐者", icon: "🌙", image: "images/revenant.jpeg" },
       { name: "隠者", icon: "🔮", image: "images/recluse.webp" },
-      { name: "執行者", icon: "⛓️", image: "images/executor.webp" },
-      { name: "葬儀屋", icon: "⚰️", image: "images/undertaker.webp" },
+      { name: "執行者", icon: "⛓️", image: "images/undertaker.webp" },
+      { name: "葬儀屋", icon: "⚰️", image: "images/ironeye.webp" },
       { name: "学者", icon: "📚", image: "images/scholar.webp" },
-      { name: "自由", icon: "✨" }
+      { name: "自由", icon: "✨", image: "images/free.jpeg" }
     ];
     const PLAYER_NAMES = ["すず", "とみた", "ぱるこ", "けたん"];
     const PLAYER_COLORS = ["p1", "p2", "p3", "p4"];
