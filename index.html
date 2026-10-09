@@ -50,7 +50,7 @@
     .start { background: linear-gradient(#22c995, #059669); }
     .stop { background: linear-gradient(#fb7185, #dc354f); }
     .neutral { background: linear-gradient(#536787, #35445f); }
-    .stage-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; align-items: stretch; }
+    .stage-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: stretch; }
     .card {
       min-width: 0;
       padding: 15px;
@@ -106,7 +106,6 @@
       <article class="card player-card" data-player="0"></article>
       <article class="card player-card" data-player="1"></article>
       <article class="card player-card" data-player="2"></article>
-      <article class="card player-card" data-player="3"></article>
     </section>
     <p class="footer-note">プレイヤーごとの候補は、このブラウザに保存されます。</p>
   </main>
@@ -124,7 +123,7 @@
       { name: "学者", icon: "📚", image: "images/scholar.webp" },
       { name: "自由", icon: "✨", image: "images/free.jpeg" }
     ];
-    const PLAYER_NAMES = ["すず", "とみた", "ぱるこ", "けたん"];
+    const PLAYER_NAMES = ["A", "B", "C"];
     const PLAYER_COLORS = ["p1", "p2", "p3", "p4"];
     const STORAGE_KEY = "nightreign-roulette-local-v1";
     const players = PLAYER_NAMES.map((name, index) => ({
