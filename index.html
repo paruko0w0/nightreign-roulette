@@ -1,19 +1,242 @@
 <!doctype html>
-<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#111827"><title>ナイトレイン キャラルーレット</title>
-<style>
-:root{color-scheme:dark;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:#0b1020;color:#f6f7fb}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -18%,#263451 0,#111a2d 38%,#0b1020 76%)}button,summary{font:inherit}button{min-height:44px;color:#fff;border:1px solid #ffffff20;border-radius:14px;padding:10px 14px;font-weight:750;cursor:pointer;box-shadow:0 4px 0 #0005,inset 0 1px #ffffff22}button:disabled{opacity:.45;cursor:not-allowed}.wrap{width:min(1600px,100%);margin:auto;padding:24px 18px 40px}header{text-align:center;margin-bottom:20px}h1{font-size:clamp(2rem,4vw,3.4rem);margin:0 0 8px;letter-spacing:.04em}.subtitle{color:#d2d9e9;margin:0}.toolbar{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:20px 0 24px}.toolbar button{min-width:145px}.start{background:linear-gradient(#22c995,#059669)}.stop{background:linear-gradient(#fb7185,#dc354f)}.neutral{background:linear-gradient(#536787,#35445f)}.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.card{min-width:0;padding:14px;border-radius:20px;border:1px solid #aebbd533;background:linear-gradient(155deg,#273149,#171e31 52%,#121a2b);box-shadow:0 16px 40px #0005}.head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}.pill{border-radius:999px;padding:7px 14px;font-size:1.05rem;font-weight:800;white-space:nowrap}.p1{background:#e34758}.p2{background:#0caa77}.p3{background:#387fe2}.p4{background:#8b52db}.count{font-size:.85rem;color:#d2d9e9}.stage{min-height:195px;border-radius:17px;background:radial-gradient(ellipse at 50% 18%,#293753,#10182a 72%);display:flex;flex-direction:column;justify-content:center;align-items:center;margin-bottom:12px;padding:12px}.icon{font-size:4.2rem;min-height:92px;display:grid;place-items:center}.free{color:#f7d66a}.name{font-size:1.35rem;font-weight:800;text-align:center;min-height:1.6em}.pending{color:#aebbd3}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.actions .rest{grid-column:1/-1}details{margin-top:10px;border-top:1px solid #ffffff18;padding-top:8px}summary{cursor:pointer;color:#dce4f3;font-weight:700;min-height:36px;display:flex;align-items:center}.candidate-count{color:#aebbd3;font-size:.9rem;margin:4px 0 8px}.list{display:grid;grid-template-columns:1fr 1fr;gap:4px 6px}.list label{display:flex;align-items:center;gap:6px;min-height:30px;font-size:.82rem;cursor:pointer}.list input{width:18px;height:18px;accent-color:#4dd6a5;flex:none}.footer{color:#aebbd3;text-align:center;margin-top:18px;font-size:.9rem}@media(max-width:1100px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.wrap{padding:18px 12px 30px}.cards{grid-template-columns:1fr}.stage{min-height:205px}.toolbar button{flex:1 1 140px}}
-</style></head><body><main class="wrap"><header><h1>キャラルーレット</h1><p class="subtitle">10キャラ＋自由</p><div class="toolbar" aria-label="全員用の操作"><button class="start" id="startAll">全員スタート</button><button class="stop" id="stopAll">全員ストップ</button><button class="neutral" id="reset">設定を初期化</button></div></header><section class="cards" id="cards" aria-label="プレイヤー別ルーレット"></section><p class="footer">キャラ候補の設定は、このブラウザに保存されます。</p></main>
-<script>
-const CHARS=[{n:"追跡者",i:"🗡️"},{n:"守護者",i:"🛡️"},{n:"鉄の目",i:"🏹"},{n:"レディ",i:"🪶"},{n:"無頼漢",i:"⚔️"},{n:"復讐者",i:"🌙"},{n:"隠者",i:"🔮"},{n:"執行者",i:"⛓️"},{n:"葬儀屋",i:"⚰️"},{n:"学者",i:"📚"},{n:"自由",i:"✨",free:true}];
-const NAMES=["すず","とみた","ぱるこ","けたん"],COLORS=["p1","p2","p3","p4"],KEY="nightreign-roulette-final-v1",root=document.getElementById("cards");
-function saved(i){try{let a=JSON.parse(localStorage.getItem(KEY)||"null");if(Array.isArray(a)&&Array.isArray(a[i])&&a[i].length===CHARS.length)return a[i]}catch(e){}return CHARS.map(()=>true)}
-let ps=NAMES.map((n,i)=>({n,on:saved(i),timer:null,result:null,rest:false,open:false}));
-function pick(p){let a=CHARS.filter((_,i)=>p.on[i]);return a.length?a[Math.floor(Math.random()*a.length)]:null}
-function render(){root.innerHTML=ps.map((p,k)=>{let a=p.on.filter(Boolean).length,c=p.result;return '<article class="card"><div class="head"><span class="pill '+COLORS[k]+'">'+p.n+'</span><span class="count">'+a+'/11種類</span></div><div class="stage" aria-live="polite"><div class="icon '+(c&&c.free?'free':'')+'">'+(c?c.i:'？')+'</div><div class="name '+(c?'':'pending')+'">'+(p.rest?'休み':c?c.n:'未決定')+'</div></div><div class="actions"><button class="start" data-a="start" data-p="'+k+'">スタート</button><button class="stop" data-a="stop" data-p="'+k+'" '+(p.timer?'':'disabled')+'>ストップ</button><button class="neutral rest" data-a="rest" data-p="'+k+'">休みにする</button></div><details '+(p.open?'open':'')+'><summary>キャラをカスタム</summary><p class="candidate-count">候補：'+a+' / 11</p><div class="list">'+CHARS.map((x,j)=>'<label><input type="checkbox" data-c="'+j+'" data-p="'+k+'" '+(p.on[j]?'checked':'')+'>'+x.n+'</label>').join('')+'</div></details></article>'}).join('');root.querySelectorAll('details').forEach((d,k)=>d.addEventListener('toggle',()=>{ps[k].open=d.open}));}
-function start(k){let p=ps[k];if(p.timer||!p.on.some(Boolean))return;p.rest=false;p.timer=setInterval(()=>{p.result=pick(p);render()},100);render()}
-function stop(k){let p=ps[k];if(!p.timer)return;clearInterval(p.timer);p.timer=null;p.result=pick(p);render()}
-function stopAll(){ps.forEach((_,k)=>stop(k))}
-document.getElementById('startAll').onclick=()=>ps.forEach((_,k)=>start(k));document.getElementById('stopAll').onclick=stopAll;document.getElementById('reset').onclick=()=>{stopAll();ps.forEach(p=>{p.on=CHARS.map(()=>true);p.result=null;p.rest=false});localStorage.setItem(KEY,JSON.stringify(ps.map(p=>p.on)));render()};
-root.addEventListener('click',e=>{let b=e.target.closest('button[data-a]');if(!b)return;let k=Number(b.dataset.p);if(b.dataset.a==='start')start(k);if(b.dataset.a==='stop')stop(k);if(b.dataset.a==='rest'){let p=ps[k];if(p.timer){clearInterval(p.timer);p.timer=null}p.rest=true;p.result=null;render()}});
-root.addEventListener('change',e=>{let x=e.target;if(!x.matches('input[data-c]'))return;let p=ps[Number(x.dataset.p)],j=Number(x.dataset.c),next=p.on.slice();next[j]=x.checked;if(!next.some(Boolean)){x.checked=true;return}p.on=next;localStorage.setItem(KEY,JSON.stringify(ps.map(q=>q.on)));render()});render();
-</script></body></html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111827">
+  <title>ナイトレイン キャラルーレット</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --page: #0b1020;
+      --panel: #171e31;
+      --panel-deep: #0e1528;
+      --line: #36415b;
+      --text: #f6f7fb;
+      --muted: #b8c0d3;
+      --green: #10b981;
+      --red: #f05268;
+      --blue: #526b98;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background: radial-gradient(ellipse at 50% -18%, #263451 0, #111a2d 38%, var(--page) 76%);
+    }
+    button, summary { font: inherit; }
+    button {
+      min-height: 44px;
+      color: #fff;
+      border: 1px solid #ffffff18;
+      border-radius: 14px;
+      padding: 10px 14px;
+      font-weight: 750;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #0005, inset 0 1px #ffffff22;
+      transition: filter .12s ease, transform .12s ease;
+    }
+    button:hover { filter: brightness(1.09); }
+    button:active { transform: translateY(2px); box-shadow: 0 2px 0 #0005, inset 0 1px #ffffff22; }
+    button:focus-visible, summary:focus-visible, input:focus-visible { outline: 3px solid #fbbf24; outline-offset: 3px; }
+    .wrap { width: min(1600px, 100%); margin: 0 auto; padding: 26px 22px 44px; }
+    header { text-align: center; margin-bottom: 22px; }
+    h1 { font-size: clamp(2rem, 4vw, 3.6rem); line-height: 1.1; letter-spacing: .06em; margin: 0 0 8px; text-shadow: 0 4px 12px #0008; }
+    .subtitle { margin: 0; color: #d2d9e9; font-weight: 650; font-size: 1rem; }
+    .toolbar { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin: 20px 0 28px; }
+    .toolbar button { min-width: 150px; font-size: 1rem; }
+    .start { background: linear-gradient(#22c995, #059669); }
+    .stop { background: linear-gradient(#fb7185, #dc354f); }
+    .neutral { background: linear-gradient(#536787, #35445f); }
+    .stage-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; align-items: stretch; }
+    .card {
+      min-width: 0;
+      padding: 15px;
+      border-radius: 22px;
+      border: 1px solid #aebbd526;
+      background: linear-gradient(155deg, #273149 0%, var(--panel) 46%, #121a2b 100%);
+      box-shadow: 0 16px 40px #0005, inset 0 1px #ffffff12;
+    }
+    .card-head { min-height: 52px; display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .name-pill { border-radius: 999px; padding: 7px 15px; font-size: 1.15rem; font-weight: 800; box-shadow: inset 0 1px #ffffff55, 0 4px 0 #0004; white-space: nowrap; }
+    .p1 { background: #e34758; } .p2 { background: #0caa77; } .p3 { background: #387fe2; } .p4 { background: #8b52db; }
+    .count { color: #d2d9e9; font-size: .88rem; font-weight: 700; white-space: nowrap; }
+    .result-stage {
+      min-height: 216px;
+      border-radius: 19px;
+      border: 1px solid #ffffff12;
+      background: radial-gradient(ellipse at 50% 18%, #293753, #10182a 72%);
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      margin-bottom: 12px; padding: 14px 8px; overflow: hidden;
+    }
+    .result-icon { min-height: 112px; display: grid; place-items: center; font-size: 4.8rem; line-height: 1; filter: drop-shadow(0 7px 10px #0008); }
+        .result-icon img { display: block; width: 132px; height: 132px; object-fit: contain; border-radius: 14px; filter: drop-shadow(0 7px 10px #0008); }
+    .result-icon.free { color: #f7d66a; text-shadow: 0 0 24px #f7d66a55; }
+    .result-name { min-height: 1.6em; font-size: 1.45rem; font-weight: 800; text-align: center; text-shadow: 0 2px 8px #0008; }
+    .result-name.pending { color: #aebbd3; font-size: 1.15rem; }
+    .player-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .player-actions .rest { grid-column: 1 / -1; }
+    .player-card .player-actions button { padding: 9px 7px; font-size: .92rem; }
+    details { margin-top: 10px; border-top: 1px solid #ffffff16; padding-top: 10px; }
+    summary { cursor: pointer; color: #dce4f3; font-weight: 700; min-height: 36px; display: flex; align-items: center; }
+    .candidate-count { color: #aebbd3; font-size: .9rem; margin: 4px 0 8px; }
+    .candidate-list { display: grid; grid-template-columns: 1fr 1fr; gap: 5px 8px; }
+    .candidate-list label { display: flex; align-items: center; gap: 6px; min-height: 30px; font-size: .84rem; color: #e2e8f3; cursor: pointer; }
+    .candidate-list input { width: 18px; height: 18px; accent-color: #4dd6a5; flex: 0 0 auto; }
+    .footer-note { color: #aebbd3; text-align: center; margin: 18px 0 0; font-size: .9rem; }
+    @media (max-width: 1180px) { .stage-grid { grid-template-columns: repeat(3, minmax(0,1fr)); } }
+    @media (max-width: 760px) { .wrap { padding: 20px 14px 30px; } .stage-grid { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; } .card { padding: 12px; } .result-stage { min-height: 190px; } .result-icon { font-size: 4.2rem; } .result-icon img { width: 124px; height: 124px; } .toolbar button { flex: 1 1 145px; } }
+    @media (max-width: 520px) { .stage-grid { grid-template-columns: 1fr; } .card { max-width: 100%; } .result-stage { min-height: 210px; } .name-pill { font-size: 1.1rem; } }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <h1>キャラルーレット</h1>
+      <p class="subtitle">10キャラ＋自由</p>
+      <div class="toolbar" aria-label="全員用の操作">
+        <button class="start" id="startAll" type="button">全員スタート</button>
+        <button class="stop" id="stopAll" type="button">全員ストップ</button>
+        <button class="neutral" id="reset" type="button">設定を初期化</button>
+      </div>
+    </header>
+    <section class="stage-grid" id="cards" aria-label="ルーレット">
+      <article class="card player-card" data-player="0"></article>
+      <article class="card player-card" data-player="1"></article>
+      <article class="card player-card" data-player="2"></article>
+      <article class="card player-card" data-player="3"></article>
+    </section>
+    <p class="footer-note">プレイヤーごとの候補は、このブラウザに保存されます。</p>
+  </main>
+  <script>
+    const CHARACTERS = [
+      { name: "追跡者", icon: "🗡️", image: "images/wylder.webp" },
+      { name: "守護者", icon: "🛡️", image: "images/guardian.webp" },
+      { name: "鉄の目", icon: "🏹", image: "images/ironeye.webp" },
+      { name: "レディ", icon: "🪶", image: "images/duchess.webp" },
+      { name: "無頼漢", icon: "⚔️", image: "images/raider.webp" },
+      { name: "復讐者", icon: "🌙", image: "images/revenant.jpeg" },
+      { name: "隠者", icon: "🔮", image: "images/recluse.webp" },
+      { name: "執行者", icon: "⛓️", image: "images/executor.webp" },
+      { name: "葬儀屋", icon: "⚰️", image: "images/undertaker.webp" },
+      { name: "学者", icon: "📚", image: "images/scholar.webp" },
+      { name: "自由", icon: "✨" }
+    ];
+    const PLAYER_NAMES = ["すず", "とみた", "ぱるこ", "けたん"];
+    const PLAYER_COLORS = ["p1", "p2", "p3", "p4"];
+    const STORAGE_KEY = "nightreign-roulette-local-v1";
+    const players = PLAYER_NAMES.map((name, index) => ({
+      name,
+      enabled: loadEnabled(index),
+      timer: null,
+      result: null,
+      isRest: false
+    }));
+
+    function loadEnabled(index) {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        if (saved && Array.isArray(saved[index]) && saved[index].length === CHARACTERS.length) return saved[index];
+      } catch (_) {}
+      return CHARACTERS.map(() => true);
+    }
+    function saveEnabled() {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(players.map(p => p.enabled))); }
+      catch (_) { /* Browsers with storage disabled still work for this session. */ }
+    }
+    function visualFor(result) {
+      const character = CHARACTERS.find(c => c.name === result);
+      if (!character) return "?";
+      return character.image ? `<img src="${character.image}" alt="${character.name}" decoding="async">` : character.icon;
+    }
+    function playerMarkup(player, index) {
+      const selected = player.result;
+      const isFree = selected === "自由";
+      const available = player.enabled.filter(Boolean).length;
+      return `
+        <div class="card-head">
+          <span class="name-pill ${PLAYER_COLORS[index]}">${player.name}</span>
+          <span class="count">${available}/11種類</span>
+        </div>
+        <div class="result-stage" aria-live="polite">
+          <div class="result-icon ${isFree ? "free" : ""}">${selected ? visualFor(selected) : "？"}</div>
+          <div class="result-name ${selected ? "" : "pending"}">${player.isRest ? "休み" : (selected || "未決定")}</div>
+        </div>
+        <div class="player-actions">
+          <button class="start" type="button" data-action="start" data-player="${index}">スタート</button>
+          <button class="stop" type="button" data-action="stop" data-player="${index}">ストップ</button>
+          <button class="neutral rest" type="button" data-action="rest" data-player="${index}">休みにする</button>
+        </div>
+        <details>
+          <summary>キャラをカスタム</summary>
+          <p class="candidate-count">このプレイヤーの候補：${available} / 11</p>
+          <div class="candidate-list">
+            ${CHARACTERS.map((character, choice) => `<label><input type="checkbox" data-choice="${choice}" data-player="${index}" ${player.enabled[choice] ? "checked" : ""}>${character.name}</label>`).join("")}
+          </div>
+        </details>`;
+    }
+    function render() {
+      const openSettings = Array.from(document.querySelectorAll(".player-card details"), details => details.open);
+      document.querySelectorAll(".player-card").forEach((card, index) => { card.innerHTML = playerMarkup(players[index], index); });
+      document.querySelectorAll(".player-card details").forEach((details, index) => { details.open = openSettings[index] || false; });
+      document.querySelectorAll("input[data-choice]").forEach(input => input.addEventListener("change", onCandidateChange));
+    }
+    function pickCharacter(index) {
+      const choices = CHARACTERS.filter((_, choice) => players[index].enabled[choice]);
+      return choices.length ? choices[Math.floor(Math.random() * choices.length)].name : null;
+    }
+    function startPlayer(index) {
+      const player = players[index];
+      const choices = player.enabled.filter(Boolean);
+      if (!choices.length || player.timer) return;
+      player.isRest = false;
+      player.timer = setInterval(() => { player.result = pickCharacter(index); render(); }, 100);
+      render();
+    }
+    function stopPlayer(index) {
+      const player = players[index];
+      if (!player.timer) return;
+      clearInterval(player.timer);
+      player.timer = null;
+      player.result = pickCharacter(index);
+      render();
+    }
+    function startAll() { players.forEach((player, index) => { if (!player.timer) startPlayer(index); }); }
+    function stopAll() { players.forEach((_, index) => stopPlayer(index)); }
+    function onCandidateChange(event) {
+      const index = Number(event.target.dataset.player);
+      const choice = Number(event.target.dataset.choice);
+      const next = [...players[index].enabled];
+      next[choice] = event.target.checked;
+      if (!next.some(Boolean)) { event.target.checked = true; return; }
+      players[index].enabled = next;
+      saveEnabled();
+      render();
+    }
+    document.getElementById("startAll").addEventListener("click", startAll);
+    document.getElementById("stopAll").addEventListener("click", stopAll);
+    document.getElementById("reset").addEventListener("click", () => {
+      stopAll();
+      players.forEach(player => { player.enabled = CHARACTERS.map(() => true); player.result = null; player.isRest = false; });
+      saveEnabled();
+      render();
+    });
+    document.getElementById("cards").addEventListener("click", event => {
+      const button = event.target.closest("button[data-action]");
+      if (!button) return;
+      const index = Number(button.dataset.player);
+      if (button.dataset.action === "start") startPlayer(index);
+      if (button.dataset.action === "stop") stopPlayer(index);
+      if (button.dataset.action === "rest") {
+        if (players[index].timer) { clearInterval(players[index].timer); players[index].timer = null; }
+        players[index].isRest = true;
+        players[index].result = null;
+        render();
+      }
+    });
+    render();
+  </script>
+</body>
+</html>
